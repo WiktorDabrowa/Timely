@@ -1,0 +1,31 @@
+services:
+
+  my_nginx:
+    image: nginx
+    ports:
+      - "80:80"
+    networks:
+      timely:
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./static:/nginx
+
+  web:
+    build: .
+    volumes:
+      - ./timely:/timely
+    ports:
+      - "8080:8080"
+    command: gunicorn timely.wsgi --bind 0.0.0.0:8080
+    networks:
+      timely:
+
+  # postgres:
+  # redis:
+  # celery:
+  # nginx-to-prometheus
+  # prometheus
+
+
+networks:
+  timely:
