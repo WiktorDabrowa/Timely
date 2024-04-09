@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework import permissions, viewsets, status
+from rest_framework.decorators import api_view, permission_classes
 
 from .models import Activity, UserActivity
 from .serializers import ReadUserActivitySerializer, ActivitySerializer, WriteUserActivitySerializer
@@ -11,25 +12,27 @@ from authorization.serializers import SiteUserSerializer
 class ActivityViewSet(viewsets.ModelViewSet):
     queryset = Activity.objects.all()
     serializer_class = ActivitySerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
-    def create(self, request):
-        pass
+    # TODO:
+    # def create(self, request):
+    #     pass
     
-    def retrieve(self, request, pk):
-        return Response(data=f'{pk}')
+    # def retrieve(self, request, pk):
+    #     return Response(data=f'{pk}')
 
-    def destroy(self, request, pk):
-        pass
+    # def destroy(self, request, pk):
+    #     pass
 
 class UserActivityViewSet(viewsets.ModelViewSet):
     serializer_class = ReadUserActivitySerializer
     read_serializer = ReadUserActivitySerializer
     write_serializer = WriteUserActivitySerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     @check_if_instance_exists(SiteUser, 'user_pk')
     def list(self, request, user_pk):
+        print(request.user)
         user_activities = self.get_queryset()
         serializer = self.get_serializer_class()
         data = serializer(user_activities, many=True).data
@@ -72,12 +75,6 @@ class UserActivityViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         response = super().destroy(request, user_pk, pk)
         return response
-    
-    # TODO:
-    # @check_if_instance_exists(SiteUser, 'user_pk')
-    # def update(self, request, user_pk, pk):
-    #     pass
-        
 
     def get_queryset(self, activity_pk=None):
         if self.queryset is None:
@@ -110,10 +107,20 @@ class UserActivityViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = SiteUser.objects.all()
     serializer_class = SiteUserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticated]
 
     def destroy(self, request, pk):
         if request.user.id != pk:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         response = super().destroy(request, pk=pk)
         return response
+    
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def me_view(request):
+    user = SiteUser.objects.get(id=request.user.id)
+    user_activities = UserActivity.objects.filter(user__pk=request.user.id)
+    data = SiteUserSerializer(user).data
+    act_data = ReadUserActivitySerializer(user_activities, many=True).data
+    data['activities'] = act_data
+    return Response(data=data)

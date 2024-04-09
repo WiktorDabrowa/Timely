@@ -7,8 +7,8 @@ router.register(r'activities', views.ActivityViewSet)
 router.register(r'users', views.UserViewSet)
 router.register(r'users/(?P<user_pk>\d+)/activities', views.UserActivityViewSet, basename='user_activities')
 
-# urlpatterns = [
-#     path("users/<int:user_pk>/activities/<int:activity_id>", views.UserViewSet.activity_detail)
-# ]
+urlpatterns = [
+    path("users/me/", views.me_view)
+]
 
-urlpatterns = router.urls
+urlpatterns += router.urls
