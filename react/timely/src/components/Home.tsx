@@ -1,6 +1,7 @@
 import { useState, useEffect} from "react";
 import { makeRequest } from "./utils";
-
+import Navbar from "./NavBar";
+import { Outlet } from "react-router-dom";
 
 export default function Home() {
     const [data, setData] = useState({
@@ -24,14 +25,14 @@ export default function Home() {
         fetchData();
     }, [])
     
-    const activities = data.activities.map(act => 
-        <div key={act.id}>{act.activity.name}</div>
-    )
+    // const activities = data.activities.map(act => 
+    //     <div key={act.id}>{act.activity.name}</div>
+    // )
 
     return (
         <>
-        <div>{data.username}</div>
-        {activities}
+        <Navbar></Navbar>
+        <Outlet></Outlet>
         {isLoading && <div className="loading"><div className='loader'/></div>}
         </>
     )

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { makeRequest } from './utils';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 export default function Login() {
 
@@ -72,6 +73,7 @@ export default function Login() {
             <form 
                 onSubmit={submitForm}
                 className='card login-form'>
+                <h2 className='login-form-title'>Log in</h2>
                 <input 
                     type="text"
                     name='name'
@@ -89,7 +91,8 @@ export default function Login() {
                 <input type="submit" value="Log In"/>
             </form>
             {loading && <div className='loading'><div className='loader'/></div>}
-            {error && <div className='error-container'>{error}</div>} 
+            {error && <div className='error-container'>{error}</div>}
+            <p>No account? Find some time to <Link to='/register'>register</Link></p>
         </div>
     )
 }
