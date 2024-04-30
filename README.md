@@ -14,3 +14,8 @@ The aim of the project is to learn more about RESTful APIs, React and docker. I 
 
 ### High level architecture overview
 ![architecture diagram](readme_static/architecture.png)
+
+### Screenshots
+
+#### Home Screen
+![alt text](readme_static/homescreen.png)

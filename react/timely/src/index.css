@@ -3,6 +3,7 @@
 @import "styles/home.css";
 @import "styles/loading.css";
 @import "styles/me.css";
+@import "styles/calendar.css";
 
 :root {
   --bg: #f5f5f5;

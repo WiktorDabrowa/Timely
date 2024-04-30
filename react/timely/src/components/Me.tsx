@@ -1,30 +1,8 @@
-import { useState, useEffect, Key } from "react";
+import { useState, useEffect} from "react";
 import { makeRequest } from "./utils";
 import { useOutletContext } from "react-router-dom";
-import Calendar from "./Calendar";
+import Calendar from "./calendar/Calendar";
 import MeBar from "./MeBar";
-
-export type Activity = {
-    id: Number,
-    created: string,
-    end_time: string,
-    is_private: boolean,
-    name: string,
-    organizer: Number,
-    start_time: string
-}
-
-export type UserActivity = {
-    id: Key,
-    is_visible: boolean,
-    activity: Activity
-}
-
-export type Data = {
-    username: string,
-    activities: Array<UserActivity>,
-    organizes: Array<Number>
-}
 
 export default function Me() {
 
@@ -48,10 +26,7 @@ export default function Me() {
             }
         }
         fetchData();
-    }, [])
-
-    // console.log(data)
-
+    }, []);
     return(
         <div className='me-container'>
             <MeBar data={data}/>
