@@ -7,7 +7,6 @@ import MeBar from "./MeBar";
 export default function Me() {
 
     const setIsLoading: Function = useOutletContext();
-    console.log(setIsLoading)
     const [data, setData] = useState({
         username: '',
         activities: [],
@@ -20,7 +19,6 @@ export default function Me() {
                 method: 'GET',
                 url: 'api/users/me'
             }, setIsLoading)
-            console.log(response)
             if (response.status === 'ok') {
                 setData(response.data)
             }

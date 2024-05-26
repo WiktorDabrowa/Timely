@@ -2,10 +2,10 @@ import Activity from "./Activity";
 const DAY_IN_MILISECONDS = 24*60*60*1000;
 
 
-export default function Weekday({data, day})  {
+export default function Weekday({data, day, is_today})  {
 
     const date = day.getDate()
-
+    const now = new Date()
     const days = {
         1: 'Monday',
         2: 'Tuesday',
@@ -16,7 +16,7 @@ export default function Weekday({data, day})  {
         0: 'Sunday',
     };
     
-    const hours = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
+    const hours = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
 
     function calculateHeight(activity): string {
         const start = new Date(activity.activity.start_time).getTime();
@@ -42,6 +42,13 @@ export default function Weekday({data, day})  {
         return style
     }
 
+    function getNowPointerStyles() {
+        const now = new Date();
+        const top = ((now.getTime() - day.getTime())/DAY_IN_MILISECONDS) * 100;
+        console.log(top)
+        return {top: `${top}%`}
+    }
+
     const weekdayActivities = data.map((activity) => (
         <Activity 
             activity={activity}
@@ -60,14 +67,15 @@ export default function Weekday({data, day})  {
     })
 
     return (
-        <div className='weekday'>
+        <div className={is_today ? 'weekday today' : 'weekday'}>
             <div className='weekday-title'>
                 <h3>{days[day.getDay()]}</h3>
                 <small>{day.getDate()}/{day.getMonth()+1}/{day.getFullYear()}</small>
             </div>
             <div className='weekday-activities'>
-                {weekdayActivities}
                 {pointers}
+                {weekdayActivities}
+                {is_today && <div style={getNowPointerStyles()} className="now-pointer"></div>}
             </div>
         </div>
     )

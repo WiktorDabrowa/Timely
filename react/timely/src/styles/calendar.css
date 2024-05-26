@@ -102,11 +102,23 @@
     height:2px
 }
 
+.hour-pointer.main:first-child {
+    height:0
+}
+
+.now-pointer {
+    position: absolute;
+    height:1px;
+    width:100%;
+    background-color:var(--highlight)
+}
+
 .activity.card {
     padding:0;
     width:85%;
     position:absolute;
-    z-index:2
+    z-index:2;
+    background-color: rgb(255,255,255,0.95)
 }
 
 .weekday:first-child .hour-pointer span{
@@ -115,4 +127,8 @@
 
 .weekday:first-child .hour-pointer.main span{
     color:var(--main)
+}
+
+.weekday.today {
+    background-color: var(--secondary);
 }

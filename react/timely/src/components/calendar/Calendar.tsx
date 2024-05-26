@@ -9,6 +9,9 @@ const DAY_IN_MILISECONDS = WEEK_IN_MILISECONDS/7;
 export default function Calendar({data}: {data: Data}) {
     
     const [thisMonday, setThisMonday] = useState(getClosestPreviousMonday());
+    const today = new Date();
+    today.setHours(0,0,0);
+
     let tasksForThisWeek = getTasksForThisWeek(thisMonday);
     const tasksOverflowwingWeekday = getTasksOverflowingWeekday(tasksForThisWeek);
     tasksForThisWeek = addOverflowingTasks(tasksForThisWeek, tasksOverflowwingWeekday);
@@ -103,14 +106,24 @@ export default function Calendar({data}: {data: Data}) {
         return truthy
     }
 
+    function areTheSameDay(date1: Date, date2: Date): boolean {
+        return (
+            date1.getFullYear() === date2.getFullYear() &&
+            date1.getMonth() === date2.getMonth() &&
+            date1.getDate() === date2.getDate()
+        )
+    }
+
     const weekdays = Object.keys(tasksForThisWeek).map((item, i) => {
         const date = new Date();
         date.setTime(thisMonday.getTime() + i*DAY_IN_MILISECONDS)
+        const is_today =  areTheSameDay(today, date)
         return (
             <Weekday 
                 key={i}
                 data={tasksForThisWeek[item]}
-                day={date}/>
+                day={date}
+                is_today={is_today}/>
         )
     })
 
@@ -120,9 +133,7 @@ export default function Calendar({data}: {data: Data}) {
     }
 
     function toggleCalendarVisibility() {
-        console.log('???')
         const calendar = document.querySelector('.calendar');
-        console.log(calendar)
         calendar.classList.toggle('big')
     }
     
