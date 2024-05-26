@@ -60,10 +60,15 @@ export default function Login() {
                         setSuccess(true);
                     case 401 :
                         setError('Invalid credentials!');
+                        setFormData({
+                            name: '',
+                            password: '',
+                        })
                 }
             } else {
                 console.log(response.err)
                 setError("Unexpected error")
+                setLoading(false);
             }
         }
     }
