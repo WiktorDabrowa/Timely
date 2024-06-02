@@ -1,6 +1,6 @@
 import { Data, UserActivity } from '../../types/activities';
 import Weekday from './Weekday';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 const WEEK_IN_MILISECONDS = 24 * 60 * 60 * 7 * 1000
 const DAY_IN_MILISECONDS = WEEK_IN_MILISECONDS/7;
@@ -11,13 +11,11 @@ export default function Calendar({data}: {data: Data}) {
     const [thisMonday, setThisMonday] = useState(getClosestPreviousMonday());
     const today = new Date();
     today.setHours(0,0,0);
-
-    let tasksForThisWeek = getTasksForThisWeek(thisMonday);
-    const tasksOverflowwingWeekday = getTasksOverflowingWeekday(tasksForThisWeek);
-    tasksForThisWeek = addOverflowingTasks(tasksForThisWeek, tasksOverflowwingWeekday);
-    
     const newMonday = new Date();
     newMonday.setTime(thisMonday.getTime() + WEEK_IN_MILISECONDS);
+
+    let tasksForThisWeek = getTasksForThisWeek(thisMonday);
+    
 
     function getClosestPreviousMonday() {
         // Returns date of the closest previous monday
@@ -30,25 +28,31 @@ export default function Calendar({data}: {data: Data}) {
     function getTasksForThisWeek(mondayDate) {
         // Returns all activities from the week which starts on a given monday's date
         const nextMonday = new Date()
-        nextMonday.setTime(mondayDate.getTime() + WEEK_IN_MILISECONDS);
+        nextMonday.setTime(mondayDate.getTime() + WEEK_IN_MILISECONDS);        
         let thisWeekTasks = data.activities.filter((activity) => {
             const activityStartDate = new Date(activity.activity.start_time)
-            if (mondayDate <= activityStartDate && activityStartDate <= nextMonday) {
+            const activityEndDate = new Date(activity.activity.start_time)
+            const begins_this_week =  mondayDate <= activityStartDate && activityStartDate <= nextMonday;
+            const ends_this_week = mondayDate <= activityEndDate && activityEndDate <= nextMonday;
+            if (begins_this_week || ends_this_week) {
                 return activity
             }
         });
-        return sortActivitiesByDay(thisWeekTasks); 
+        const sortedActivities = sortActivitiesByDay(thisWeekTasks);
+        const weekActivities =  addOverflowingTasks(sortedActivities)
+        return weekActivities; 
     }
 
     function sortActivitiesByDay(activities: Array<UserActivity>) {
+        // Maps activities to days of week
         let activitiesByDay = {
-            1: [],
+            1: [], 
             2: [],
             3: [],
             4: [],
             5: [],
             6: [],
-            7: [],
+            0: [],
         };
         activities.forEach(activity => {
             const activityDay = new Date(activity.activity.start_time).getDay();
@@ -69,7 +73,7 @@ export default function Calendar({data}: {data: Data}) {
 
     function getTasksOverflowingWeekday(tasks) {
         let tasksOverflowingWeekday = []
-        for (let i = 1; i<=7; i++) {
+        for (let i = 0; i<=6; i++) {
             const activities = tasks[i];
             activities.forEach((activity) => {
                 const startDay = new Date(activity.activity.start_time).getDate();
@@ -80,8 +84,10 @@ export default function Calendar({data}: {data: Data}) {
         return tasksOverflowingWeekday;
     }
 
-    function addOverflowingTasks(weekActivities, overflowingActivities) {
-        overflowingActivities.forEach((activity) => {
+    function addOverflowingTasks(weekActivities) {
+        // adds tasks that overflow a day to all of the days that it occurs on
+        const tasksOverflowwingWeekday = getTasksOverflowingWeekday(weekActivities);
+        tasksOverflowwingWeekday.forEach((activity) => {
             const startTime = new Date(activity.activity.start_time);
             const endTime = new Date(activity.activity.end_time);
             const duration = endTime.getTime() - startTime.getTime();
@@ -92,7 +98,13 @@ export default function Calendar({data}: {data: Data}) {
             numberOfDaysInSpan > 7 && (numberOfDaysInSpan = 7);
             const activityStartDay = startTime.getDay();
             for (let i = activityStartDay; i <= activityStartDay+numberOfDaysInSpan; i++) {
+                if (i === 7) {
+                    i = 0
+                } 
                 weekActivities[i].push(activity);
+                if (i === 0) {
+                    break
+                }
             }
         });
 
@@ -102,7 +114,7 @@ export default function Calendar({data}: {data: Data}) {
     function moduloOverflowsDay(startTime, modulo) {
         const date = new Date();
         date.setTime(startTime.getTime() + modulo*24*60*60*1000);
-        const truthy = date.getDate() !== startTime.getDate() ? true : false
+        const truthy = date.getDate() !== startTime.getDate()
         return truthy
     }
 
@@ -114,22 +126,25 @@ export default function Calendar({data}: {data: Data}) {
         )
     }
 
-    const weekdays = Object.keys(tasksForThisWeek).map((item, i) => {
-        const date = new Date();
-        date.setTime(thisMonday.getTime() + i*DAY_IN_MILISECONDS)
-        const is_today =  areTheSameDay(today, date)
-        return (
-            <Weekday 
-                key={i}
-                data={tasksForThisWeek[item]}
-                day={date}
-                is_today={is_today}/>
-        )
-    })
-
-    function getDateStringRepr(date) {
-        const repr = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`
-        return repr
+    function getWeekdays(): Array<ReactNode> {
+        let weekdays = []
+        for (let i = 1; i<=7; i++) {
+            const date = new Date();
+            date.setTime(thisMonday.getTime() + (i-1)*DAY_IN_MILISECONDS);
+            const is_today = areTheSameDay(today, date);
+            i ===  7 ? i=0 : i=i
+            weekdays.push(
+                <Weekday 
+                    key={i}
+                    data={tasksForThisWeek[i]}
+                    day={date}
+                    is_today={is_today}/>
+            )
+            if (i===0) {
+                break
+            }
+        }
+        return weekdays
     }
 
     function toggleCalendarVisibility() {
@@ -145,7 +160,7 @@ export default function Calendar({data}: {data: Data}) {
                 <button onClick={toggleCalendarVisibility}>Toggle Size</button>
             </div>
             <div className='calendar'>
-                {weekdays}
+                {getWeekdays()}
             </div>
         </div>
     )

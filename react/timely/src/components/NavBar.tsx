@@ -12,10 +12,11 @@ type Tab = 'me' | 'people' | 'activities' | 'find-the-time' | string
 
 export default function Navbar() {
     const [currentTab, setCurrentTab] = useState<Tab>('me')
-    const navItems = paths.map(item => {
+    const navItems = paths.map((item, i) => {
         const isOpen = item.slug === currentTab;
         return (
             <li 
+                key={i}
                 className={isOpen ? "navbar-list-item open" : "navbar-list-item"}
                 onClick={() => setCurrentTab(item.slug)}
                 >

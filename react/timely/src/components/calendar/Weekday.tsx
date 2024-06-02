@@ -4,8 +4,6 @@ const DAY_IN_MILISECONDS = 24*60*60*1000;
 
 export default function Weekday({data, day, is_today})  {
 
-    const date = day.getDate()
-    const now = new Date()
     const days = {
         1: 'Monday',
         2: 'Tuesday',
@@ -45,12 +43,12 @@ export default function Weekday({data, day, is_today})  {
     function getNowPointerStyles() {
         const now = new Date();
         const top = ((now.getTime() - day.getTime())/DAY_IN_MILISECONDS) * 100;
-        console.log(top)
         return {top: `${top}%`}
     }
 
-    const weekdayActivities = data.map((activity) => (
-        <Activity 
+    const weekdayActivities = data.map((activity, i) => (
+        <Activity
+            key={i}
             activity={activity}
             style={getActivityStyle(activity)}/>
     ))
@@ -60,7 +58,7 @@ export default function Weekday({data, day, is_today})  {
         const is_main = hour % 3 === 0
         const classes = is_main ? "hour-pointer main" : "hour-pointer"
         return (
-            <div className={classes} style={{top:top}}>
+            <div className={classes} style={{top:top}} key={hour}>
                 <span>{hour}:00</span>
             </div>
         )
